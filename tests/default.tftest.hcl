@@ -40,3 +40,29 @@ run "postgres_secrets" {
     error_message = "Agent Substrate must read its PostgreSQL connection strings from the existing Secrets."
   }
 }
+
+run "atelet_release_and_router_allowlist" {
+  command = plan
+
+  module {
+    source = "./regional"
+  }
+
+  variables {
+    ingress_allowed_spiffe_ids = ["spiffe://cluster.local/ns/kagent/sa/kagent-controller"]
+    namespace                  = "ate-system"
+  }
+
+  assert {
+    condition = (
+      yamldecode(helm_release.substrate.values[0]).atelet.enabled == false &&
+      yamldecode(helm_release.substrate_atelet.values[0]).objectStore.credentialsSecret == "rustfs-credentials"
+    )
+    error_message = "atelet must be a separate release with the bundled atelet disabled."
+  }
+
+  assert {
+    condition     = yamldecode(helm_release.substrate.values[0]).atenetRouter.ingressAllowedSPIFFEIDs == ["spiffe://cluster.local/ns/kagent/sa/kagent-controller"]
+    error_message = "The router allowlist must come from the caller and stay default-deny when empty."
+  }
+}

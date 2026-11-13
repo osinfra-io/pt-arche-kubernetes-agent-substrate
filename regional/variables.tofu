@@ -16,9 +16,21 @@ variable "crds_postrender" {
   default = null
 }
 
+variable "ingress_allowed_spiffe_ids" {
+  description = "mTLS client SPIFFE IDs allowed to reach actors through the router, for example spiffe://cluster.local/ns/kagent/sa/kagent-controller; an empty list denies all ingress"
+  type        = list(string)
+  default     = []
+}
+
 variable "namespace" {
   description = "Kubernetes namespace for Agent Substrate"
   type        = string
+}
+
+variable "object_store_credentials_secret_name" {
+  description = "Existing Secret in the namespace with AWS_ACCESS_KEY_ID and AWS_SECRET_ACCESS_KEY keys for the bundled RustFS snapshot store; atelet reads it"
+  type        = string
+  default     = "rustfs-credentials"
 }
 
 variable "postgres_owner_secret_name" {

@@ -4,13 +4,22 @@
 
 ## Repository Description
 
-Reusable OpenTofu child module that installs the Agent Substrate CRDs and control plane (`substrate-crds` and `substrate` Helm charts) on GKE. [kagent](https://github.com/osinfra-io/pt-arche-kubernetes-kagent) uses it to run agents in sandboxed actors.
+Reusable OpenTofu child module that installs the Agent Substrate CRDs, atelet and control plane (`substrate-crds`, `substrate-atelet` and `substrate` Helm charts) on GKE. [kagent](https://github.com/osinfra-io/pt-arche-kubernetes-kagent) uses it to run agents in sandboxed actors.
 
 ## 🔩 Usage
 
 Create the namespace in the consuming root and pass its name explicitly. Deploy this module before `pt-arche-kubernetes-kagent`; its `api_endpoint` output is the endpoint kagent connects to.
 
-Like the authentik module, this module uses external PostgreSQL and existing Secrets: `postgres_owner_secret_name` and `postgres_read_write_secret_name` name Secrets whose `ownerConnectionString` and `readWriteConnectionString` keys hold the connection strings. The chart does not provision the rest of its prerequisites: the cluster needs the `ClusterTrustBundle`, `ClusterTrustBundleProjection`, and `PodCertificateRequest` feature gates with the `certificates.k8s.io/v1beta1` API, and the substrate-podcert certificate controller. See the [chart README](https://github.com/agent-substrate/substrate/tree/main/charts/substrate).
+Like the authentik module, this module uses external PostgreSQL and existing Secrets: `postgres_owner_secret_name` and `postgres_read_write_secret_name` name Secrets whose `ownerConnectionString` and `readWriteConnectionString` keys hold the connection strings. The chart does not provision the rest of its prerequisites. Create these before applying the module (see the [v1.0.1 chart README](https://github.com/agent-substrate/substrate/tree/v1.0.1/charts/substrate) and the upstream `ate-setup` tool):
+
+- The cluster needs the `ClusterTrustBundle`, `ClusterTrustBundleProjection`, and `PodCertificateRequest` feature gates with the `certificates.k8s.io/v1beta1` API, and the `substrate-podcert` certificate controller with its CA pools.
+- The `actor-id-jwt-pool`, `actor-id-ca-pool`, `actor-id-ca-certs`, and `egress-mitm-ca-pool` Secrets and the `ate-api-authentication` ConfigMap, which the chart references but does not create.
+- In PostgreSQL, the schema, roles, grants, and login memberships from upstream `pkg/postgressetup/setup.sql`, in addition to the connection Secrets above.
+- A Secret named by `object_store_credentials_secret_name` with `AWS_ACCESS_KEY_ID` and `AWS_SECRET_ACCESS_KEY` for the bundled RustFS (the chart defaults are `rustfsadmin`).
+
+atelet is installed as its own `substrate-atelet` release, and the `substrate` release depends on it, because the upstream version skew policy requires atelet to be upgraded before the API server and the bundled atelet is deprecated.
+
+Substrate's default-deny NetworkPolicies admit API clients only from namespaces labelled `ate.dev/api-access=true`, so label the namespace that runs kagent. The router also denies all actor ingress until clients are listed: set `ingress_allowed_spiffe_ids` to the kagent controller identity, for example `spiffe://cluster.local/ns/kagent/sa/kagent-controller`.
 
 The chart exposes no pod label values, so Datadog unified service tagging labels are not applied to Agent Substrate pods.
 
