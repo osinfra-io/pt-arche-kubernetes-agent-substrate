@@ -8,6 +8,17 @@ locals {
   substrate_chart        = "${var.chart_repository}/substrate"
   substrate_crds_chart   = "${var.chart_repository}/substrate-crds"
 
+  substrate_sensitive_values = [
+    {
+      name  = "rustfs.accessKey"
+      value = var.rustfs_access_key
+    },
+    {
+      name  = "rustfs.secretKey"
+      value = var.rustfs_secret_key
+    }
+  ]
+
   substrate_atelet_helm_values = yamlencode({
     objectStore = {
       credentialsSecret = var.object_store_credentials_secret_name

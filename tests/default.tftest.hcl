@@ -29,7 +29,9 @@ run "postgres_secrets" {
   }
 
   variables {
-    namespace = "ate-system"
+    namespace         = "ate-system"
+    rustfs_access_key = "test-access"
+    rustfs_secret_key = "test-secret"
   }
 
   assert {
@@ -51,6 +53,8 @@ run "atelet_release_and_router_allowlist" {
   variables {
     ingress_allowed_spiffe_ids = ["spiffe://cluster.local/ns/kagent/sa/kagent-controller"]
     namespace                  = "ate-system"
+    rustfs_access_key          = "test-access"
+    rustfs_secret_key          = "test-secret"
   }
 
   assert {

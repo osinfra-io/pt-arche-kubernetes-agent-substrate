@@ -11,6 +11,8 @@ resource "helm_release" "substrate" {
   name      = "substrate"
   namespace = var.namespace
 
+  set_sensitive = local.substrate_sensitive_values
+
   values = [
     local.substrate_helm_values
   ]

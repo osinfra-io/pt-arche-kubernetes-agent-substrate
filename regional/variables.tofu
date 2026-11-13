@@ -45,6 +45,18 @@ variable "postgres_read_write_secret_name" {
   default     = "substrate-postgres-readwrite"
 }
 
+variable "rustfs_access_key" {
+  description = "Access key for the bundled RustFS snapshot store; must match AWS_ACCESS_KEY_ID in the object store credentials Secret"
+  type        = string
+  sensitive   = true
+}
+
+variable "rustfs_secret_key" {
+  description = "Secret key for the bundled RustFS snapshot store; must match AWS_SECRET_ACCESS_KEY in the object store credentials Secret"
+  type        = string
+  sensitive   = true
+}
+
 variable "substrate_version" {
   description = "Agent Substrate Helm chart version"
   type        = string
