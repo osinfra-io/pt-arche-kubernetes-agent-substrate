@@ -15,7 +15,7 @@ Like the authentik module, this module uses external PostgreSQL and existing Sec
 - The cluster needs the `ClusterTrustBundle`, `ClusterTrustBundleProjection`, and `PodCertificateRequest` feature gates with the `certificates.k8s.io/v1beta1` API, and the `substrate-podcert` certificate controller with its CA pools.
 - The `actor-id-jwt-pool`, `actor-id-ca-pool`, `actor-id-ca-certs`, and `egress-mitm-ca-pool` Secrets and the `ate-api-authentication` ConfigMap, which the chart references but does not create.
 - In PostgreSQL, the schema, roles, grants, and login memberships from upstream `pkg/postgressetup/setup.sql`, in addition to the connection Secrets above.
-- A Secret named by `object_store_credentials_secret_name` with `AWS_ACCESS_KEY_ID` and `AWS_SECRET_ACCESS_KEY` for the bundled RustFS. The same values must be passed as `rustfs_access_key` and `rustfs_secret_key`, which configure the RustFS server and bucket initializer; the chart's public `rustfsadmin` defaults are never used.
+- A Secret named by `object_store_credentials_secret_name` with `AWS_ACCESS_KEY_ID` and `AWS_SECRET_ACCESS_KEY` for the bundled RustFS. The same values must be passed as `rustfs_access_key` and `rustfs_secret_key`, which configure the RustFS server and bucket initializer; the chart's public `rustfsadmin` defaults are never used. To rotate them, update the Secret and delete the completed `rustfs-bucket-init` Job before applying, because its pod template is immutable and Helm cannot patch it.
 
 atelet is installed as its own `substrate-atelet` release, and the `substrate` release depends on it, because the upstream version skew policy requires atelet to be upgraded before the API server and the bundled atelet is deprecated.
 

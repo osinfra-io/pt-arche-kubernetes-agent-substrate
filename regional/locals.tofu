@@ -8,13 +8,16 @@ locals {
   substrate_chart        = "${var.chart_repository}/substrate"
   substrate_crds_chart   = "${var.chart_repository}/substrate-crds"
 
+  # Literal so Helm does not parse commas or backslashes in the credentials.
   substrate_sensitive_values = [
     {
       name  = "rustfs.accessKey"
+      type  = "literal"
       value = var.rustfs_access_key
     },
     {
       name  = "rustfs.secretKey"
+      type  = "literal"
       value = var.rustfs_secret_key
     }
   ]

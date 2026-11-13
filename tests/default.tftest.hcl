@@ -66,6 +66,11 @@ run "atelet_release_and_router_allowlist" {
   }
 
   assert {
+    condition     = alltrue([for v in helm_release.substrate.set_sensitive : v.type == "literal"])
+    error_message = "RustFS credentials must be passed as literals so Helm does not parse their characters."
+  }
+
+  assert {
     condition     = yamldecode(helm_release.substrate.values[0]).atenetRouter.ingressAllowedSPIFFEIDs == ["spiffe://cluster.local/ns/kagent/sa/kagent-controller"]
     error_message = "The router allowlist must come from the caller and stay default-deny when empty."
   }
